@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>სკოლის დაფა</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+<script src="js/java.js"></script>
+<style>
+:root{--chalk:#f4f2e8;--dim:#a9bbb0;--yellow:#f6e27a;--pink:#f4a9bb;--blue:#a5d8f3}
+:root:not([data-theme="light"]){color-scheme:dark}
+html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
+#stage{width:1920px;height:1080px;position:absolute;left:50%;top:50%;transform-origin:center;background:#cfc3ae;font-family:"Caveat","Noto Sans Georgian",sans-serif;color:var(--chalk)}
+.frame{position:absolute;left:18px;right:18px;top:10px;bottom:60px;border-radius:6px;background:linear-gradient(180deg,#8a5a2e,#6b4220 50%,#7d4f27);padding:20px;box-sizing:border-box;box-shadow:0 14px 30px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.2)}
+.board{position:relative;width:100%;height:100%;box-sizing:border-box;overflow:hidden;border-radius:3px;
+ background:radial-gradient(ellipse at 25% 15%,rgba(255,255,255,.12),transparent 50%),radial-gradient(ellipse at 80% 85%,rgba(255,255,255,.09),transparent 45%),#2f4a3c;
+ box-shadow:inset 0 0 90px rgba(0,0,0,.6),inset 0 0 6px #000;display:grid;grid-template-columns:330px 1fr;gap:26px;padding:14px 26px 12px}
+.board::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:screen;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 0'/></filter><rect width='300' height='300' filter='url(%23f)'/></svg>")}
+.tray{position:absolute;left:60px;right:60px;bottom:26px;height:34px;border-radius:4px;background:linear-gradient(180deg,#9a6636,#5e3a1b);box-shadow:0 8px 14px rgba(0,0,0,.4)}
+.chalk{position:absolute;bottom:34px;width:60px;height:15px;border-radius:7px;background:#f4f2e8;box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.erase{position:absolute;left:1500px;bottom:34px;width:130px;height:28px;border-radius:5px;background:linear-gradient(180deg,#d9c27a 0 35%,#3b3b3b 35%);box-shadow:0 3px 5px rgba(0,0,0,.4)}
+.ch{filter:url(#chalk)}
+.left{display:flex;flex-direction:column;border-right:3px dashed rgba(244,242,232,.35);padding-right:20px}
+.title{font-size:50px;font-weight:700;line-height:1}
+.day{font-size:46px;color:var(--yellow);line-height:1.1}
+.clock{font-size:128px;font-weight:700;line-height:.95;margin-top:8px}
+.clock small{font-size:50px;color:var(--dim)}
+.date{font-size:34px;color:var(--dim)}
+.now{margin-top:16px;border:4px solid var(--yellow);border-radius:24px 10px 26px 12px;padding:12px 16px 14px}
+.now .tag{font-size:32px;color:var(--yellow);line-height:1.1}
+.now .big{font-size:60px;font-weight:700;line-height:1.05;margin:2px 0}
+.now .sub{font-size:34px}
+.bar{height:14px;border:3px solid var(--chalk);border-radius:10px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--chalk);opacity:.85;transition:width 1s linear}
+.legend{margin-top:auto;font-size:28px;color:var(--dim);line-height:1.3}
+.legend b{color:var(--yellow)}.legend i{color:var(--pink);font-style:normal}
+#adm{display:none;margin-top:10px;font-family:"Noto Sans Georgian",sans-serif;font-size:15px}
+#adm button{font:inherit;padding:8px 12px;cursor:pointer;border:2px solid var(--chalk);background:none;color:var(--chalk);border-radius:8px}
+.tbl{display:grid;min-height:0;font-family:"Noto Sans Georgian",sans-serif;font-size:17px}
+.c{display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-bottom:1px dashed rgba(244,242,232,.18);position:relative}
+.c.g{border-bottom:2px solid rgba(244,242,232,.55)}
+.c.k{font-family:"Caveat",sans-serif;font-size:30px;font-weight:700;color:var(--yellow);justify-content:center}
+.c.h{flex-direction:column;justify-content:center;align-items:center;border-bottom:3px solid rgba(244,242,232,.6);font-family:"Caveat",sans-serif;line-height:1}
+.c.h b{font-size:40px}.c.h span{font-size:24px;color:var(--dim)}
+.c.done:not(.h):not(.k){opacity:.45;text-decoration:line-through}
+.c.done.h{opacity:.55}
+.c.cur{background:rgba(246,226,122,.12);border-left:3px solid var(--yellow);border-right:3px solid var(--yellow);font-weight:700}
+.c.cur.h{border-top:3px solid var(--yellow);border-radius:14px 14px 0 0;color:var(--yellow)}
+.c.cur.h span{color:var(--yellow)}.c.cur.last{border-bottom:3px solid var(--yellow)}
+.c.next.h{color:var(--pink)}.c.next.h span{color:var(--pink)}
+.c.next:not(.h){background:rgba(244,169,187,.06)}
+.legend{display:none}
+.tbl{font-family:"Noto Sans Georgian",sans-serif}
+.lh{grid-column:1/-1;display:flex;align-items:center;gap:30px;font-family:"Caveat",sans-serif;border-bottom:4px solid var(--yellow);color:var(--yellow);padding:0 10px}
+.lh b{font-size:76px}.lh span{font-size:64px;color:var(--chalk)}.lh em{font-style:normal;font-size:56px;margin-left:auto}
+.lh.next{color:var(--pink);border-color:var(--pink)}.lh.next em{color:var(--pink)}
+.cell{display:flex;align-items:center;gap:16px;padding:0 14px;border-bottom:2px dashed rgba(244,242,232,.2);overflow:hidden;white-space:nowrap}
+.cell:nth-of-type(3n+1){border-right:2px dashed rgba(244,242,232,.2)}
+.cell b{font-family:"Caveat",sans-serif;font-size:56px;color:var(--yellow);min-width:84px}
+.cell.next b{color:var(--pink)}
+.cell span{font-size:34px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
+.msg{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Caveat",sans-serif;font-size:110px;text-align:center}
+.msg small{font-size:60px;color:var(--dim)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="chalk" x="-2%" y="-2%" width="104%" height="104%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter></svg>
+<div id="stage">
+ <div class="frame"><div class="board">
+  <div class="left ch">
+   <div class="title">გაკვეთილების განრიგი</div>
+   <div class="day" id="day"></div>
+   <div class="clock" id="clock"></div>
+   <div class="date" id="date"></div>
+   <div class="now"><div class="tag" id="tag"></div><div class="big" id="big"></div><div class="sub" id="sub"></div><div class="bar"><i id="bar"></i></div></div>
+   <div class="legend"><b>ყვითელი</b> — ახლა მიდის<br><i>ვარდისფერი</i> — შემდეგია<br>გადახაზული — გამოვიდა</div>
+   <div id="adm"><button id="up">📂 Excel-ის ატვირთვა</button> <span id="msg"></span><input type="file" id="fi" accept=".xlsx,.xls" hidden></div>
+  </div>
+  <div class="tbl ch" id="tbl"></div>
+ </div></div>
+ <div class="tray"></div>
+ <div class="chalk" style="left:180px;transform:rotate(-4deg)"></div>
+ <div class="chalk" style="left:260px;width:44px;background:#f6e27a;transform:rotate(3deg)"></div>
+ <div class="chalk" style="left:330px;width:50px;background:#f4a9bb;transform:rotate(-2deg)"></div>
+ <div class="erase"></div>
+</div>
+<script>
+const DAYS=["კვირა","ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი"];
+const MONTHS=["იანვარი","თებერვალი","მარტი","აპრილი","მაისი","ივნისი","ივლისი","აგვისტო","სექტემბერი","ოქტომბერი","ნოემბერი","დეკემბერი"];
+// ნაგულისხმევი (სანამ Excel ატვირთული არ არის)
+function dflt(){
+ const P=["მათემატიკა","ქართული ენა","ინგლისური ენა","ისტორია","ფიზიკა","ბიოლოგია","გეოგრაფია","ქიმია","ინფორმატიკა","ფიზკულტურა","ხატვა","მუსიკა","ლიტერატურა","მოქალაქეობა"];
+ const cl=[];for(let g=1;g<=12;g++)for(const l of "აბგ")cl.push(g+l);
+ const days={};for(let d=1;d<=5;d++){days[d]={};cl.forEach((c,ci)=>{let s=(ci+1)*131+d*17,o=[];for(let i=0;i<7;i++){s=(s*1103515245+12345)&0x7fffffff;let x=P[(s>>8)%P.length];if(o[i-1]===x)x=P[((s>>8)+1)%P.length];o.push(x)}days[d][c]=o})}
+ return{times:[["08:45","09:25"],["09:30","10:10"],["10:15","10:55"],["11:05","11:45"],["11:50","12:30"],["12:35","13:15"],["13:20","14:00"]],classes:cl,days};
+}
+let D=dflt();
+const q=new URLSearchParams(location.search);
+const m=s=>{const[a,b]=s.split(":");return +a*60+ +b},p2=n=>String(n).padStart(2,"0"),$=id=>document.getElementById(id);
+function fit(){$("stage").style.transform=`translate(-50%,-50%) scale(${Math.min(innerWidth/1920,innerHeight/1080)})`}
+addEventListener("resize",fit);fit();
+let key="";
+function tick(){
+ const now=new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Tbilisi"}));
+ let h=now.getHours(),mi=now.getMinutes(),s=now.getSeconds(),dow=now.getDay();
+ if(q.get("t")){const[a,b]=q.get("t").split(":");h=+a;mi=+b;s=0}
+ if(q.get("d"))dow=+q.get("d");
+ const cur=h*60+mi+s/60,school=dow>=1&&dow<=5,T=D.times,N=T.length;
+ $("clock").innerHTML=`${p2(h)}:${p2(mi)}<small>:${p2(s)}</small>`;
+ $("day").textContent=DAYS[dow];$("date").textContent=`${now.getDate()} ${MONTHS[now.getMonth()]}, ${now.getFullYear()}`;
+ let idx=-1,next=-1;
+ T.forEach(([a,b],i)=>{if(school&&cur>=m(a)&&cur<m(b))idx=i;if(school&&next<0&&cur<m(a))next=i});
+ const L=idx>=0?idx:next, state=idx>=0?"cur":"next";
+ const k=[L,state,school,dow,D.at,JSON.stringify(D.times)].join("|");
+ if(k!==key){key=k;const t=$("tbl"),cls=D.classes,dd=D.days[school?dow:1]||{};
+  if(!school||L<0){t.style.gridTemplateColumns="1fr";t.style.gridTemplateRows="1fr";
+   t.innerHTML=`<div class="msg">${!school?"დღეს გაკვეთილები არ არის":"გაკვეთილები დამთავრდა"}<small>${!school?"კარგად დაისვენეთ!":"კარგად მიხვიდეთ სახლში!"}</small></div>`;}
+  else{const rows=Math.ceil(cls.length/3);t.style.gridTemplateColumns="repeat(3,1fr)";t.style.gridTemplateRows=`96px repeat(${rows},1fr)`;
+   let h2=`<div class="lh ${state}"><b>${L+1}-ე გაკვეთილი</b><span>${D.times[L][0]} – ${D.times[L][1]}</span><em>${state==="cur"?"შესულია":"შემდეგია"}</em></div>`;
+   cls.forEach(c=>{h2+=`<div class="cell ${state}"><b>${c}</b><span>${(dd[c]||[])[L]||""}</span></div>`});
+   t.innerHTML=h2;}}
+ let tg,bg,sb,pr=0;
+ if(!school){tg="დღეს";bg="გაკვეთილები არ არის";sb="კარგად დაისვენეთ!"}
+ else if(idx>=0){const[a,b]=T[idx];tg=`${idx+1}-ე გაკვეთილი · შესულია ${a}-ზე`;bg="მიდის";sb=`გამოსვლამდე ${Math.ceil(m(b)-cur)} წუთი (${b})`;pr=(cur-m(a))/(m(b)-m(a))*100}
+ else if(next===0){tg="გაკვეთილები ჯერ არ დაწყებულა";bg="1-ლი შემდეგია";sb=`იწყება ${T[0][0]}-ზე`}
+ else if(next>0){const pb=m(T[next-1][1]);tg="შესვენება";bg=`${next+1}-ე შემდეგია`;sb=`დაწყებამდე ${Math.ceil(m(T[next][0])-cur)} წუთი`;pr=(cur-pb)/(m(T[next][0])-pb)*100}
+ else{tg="დღე დასრულდა";bg="გაკვეთილები დამთავრდა";sb="კარგად მიხვიდეთ სახლში!";pr=100}
+ $("tag").textContent=tg;$("big").textContent=bg;$("sub").textContent=sb;$("bar").style.width=Math.max(0,Math.min(100,pr))+"%";
+}
+tick();setInterval(tick,1000);
+// ===== Excel =====
+const WD=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი"];
+function tm(v){if(typeof v==="number"){const n=Math.round(v*1440);return p2(Math.floor(n/60))+":"+p2(n%60)}const r=/(\d{1,2}):(\d{2})/.exec(String(v||""));return r?p2(+r[1])+":"+r[2]:null}
+function parse(wb){
+ const T=[];XLSX.utils.sheet_to_json(wb.Sheets["ზარები"],{header:1,raw:true}).slice(1).forEach(r=>{const a=tm(r[1]),b=tm(r[2]);if(a&&b)T.push([a,b])});
+ if(!T.length)throw new Error("ზარები ვერ ვიპოვე");
+ const days={};let classes=[];
+ WD.forEach((n,i)=>{const sh=wb.Sheets[n];if(!sh)throw new Error("ფურცელი არ არის: "+n);const o={},cl=[];
+  XLSX.utils.sheet_to_json(sh,{header:1,raw:true}).slice(1).forEach(r=>{const c=String(r[0]??"").trim();if(!c)return;cl.push(c);o[c]=T.map((_,j)=>String(r[j+1]??"").trim())});
+  days[i+1]=o;if(!classes.length)classes=cl});
+ return{times:T,classes,days,at:Date.now()};
+}
+(async()=>{
+ try{
+  const db=await claude.use("db");if(!db)return;const ref=db.doc("board/schedule");
+  ref.onSnapshot(s=>{if(s.exists){try{D=JSON.parse(s.data().json);key="";tick()}catch(e){}}});
+  if(q.has("edit")){$("adm").style.display="block";
+   $("up").onclick=()=>$("fi").click();
+   $("fi").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{const nd=parse(XLSX.read(await f.arrayBuffer(),{type:"array"}));await ref.set({json:JSON.stringify(nd)});$("msg").textContent="✓ განახლდა"}
+    catch(err){$("msg").textContent="შეცდომა: "+(err.message||err.code)}};}
+ }catch(e){}
+})();
+</script>
+</body>
+</html>
