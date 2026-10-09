@@ -4,8 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>სკოლის დაფა</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>🏫</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
-<script src="js/java.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{--chalk:#f4f2e8;--dim:#a9bbb0;--yellow:#f6e27a;--pink:#f4a9bb;--blue:#a5d8f3}
 :root:not([data-theme="light"]){color-scheme:dark}
@@ -21,7 +22,7 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
 .erase{position:absolute;left:1500px;bottom:34px;width:130px;height:28px;border-radius:5px;background:linear-gradient(180deg,#d9c27a 0 35%,#3b3b3b 35%);box-shadow:0 3px 5px rgba(0,0,0,.4)}
 .ch{filter:url(#chalk)}
 .left{display:flex;flex-direction:column;border-right:3px dashed rgba(244,242,232,.35);padding-right:20px}
-.title{font-size:50px;font-weight:700;line-height:1}
+.title{font-size:40px;font-weight:700;line-height:1;white-space:nowrap}
 .day{font-size:46px;color:var(--yellow);line-height:1.1}
 .clock{font-size:128px;font-weight:700;line-height:.95;margin-top:8px}
 .clock small{font-size:50px;color:var(--dim)}
@@ -34,8 +35,6 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--chalk);opacity:.85;transition:width 1s linear}
 .legend{margin-top:auto;font-size:28px;color:var(--dim);line-height:1.3}
 .legend b{color:var(--yellow)}.legend i{color:var(--pink);font-style:normal}
-#adm{display:none;margin-top:10px;font-family:"Noto Sans Georgian",sans-serif;font-size:15px}
-#adm button{font:inherit;padding:8px 12px;cursor:pointer;border:2px solid var(--chalk);background:none;color:var(--chalk);border-radius:8px}
 .tbl{display:grid;min-height:0;font-family:"Noto Sans Georgian",sans-serif;font-size:17px}
 .c{display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;border-bottom:1px dashed rgba(244,242,232,.18);position:relative}
 .c.g{border-bottom:2px solid rgba(244,242,232,.55)}
@@ -61,6 +60,19 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
 .cell span{font-size:34px;font-weight:700;overflow:hidden;text-overflow:ellipsis}
 .msg{display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Caveat",sans-serif;font-size:110px;text-align:center}
 .msg small{font-size:60px;color:var(--dim)}
+#chalkY{cursor:pointer;z-index:20}#chalkY::after{content:"";position:absolute;inset:-20px -14px}
+#ov{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-family:"Noto Sans Georgian",sans-serif}
+#ov[hidden]{display:none}
+.pnl{position:relative;width:680px;max-height:900px;overflow:auto;box-sizing:border-box;padding:30px 36px;background:#2f4a3c;border:12px solid #7d4f27;border-radius:10px;color:var(--chalk);box-shadow:0 20px 60px rgba(0,0,0,.7);font-size:20px}
+.pnl h2{margin:0 0 14px;font-family:"Caveat",sans-serif;font-size:56px;color:var(--yellow)}
+.pnl p,.pnl label{margin:6px 0;display:block;color:var(--chalk)}
+.pnl input[type=text],.pnl input[type=password]{width:100%;box-sizing:border-box;padding:12px 14px;margin:8px 0;font:inherit;font-size:20px;background:rgba(0,0,0,.25);color:var(--chalk);border:2px solid rgba(244,242,232,.5);border-radius:8px}
+.pnl button{font:inherit;font-size:20px;padding:11px 18px;margin:6px 0;cursor:pointer;color:var(--chalk);background:rgba(244,242,232,.08);border:2px solid var(--chalk);border-radius:8px}
+.pnl button:hover{background:rgba(246,226,122,.2);border-color:var(--yellow)}
+.pnl .x{position:absolute;top:6px;right:8px;border:none;font-size:26px;margin:0;padding:4px 10px}
+.pnl hr{border:none;border-top:2px dashed rgba(244,242,232,.3);margin:16px 0}
+.pnl .hint{font-size:16px;color:var(--dim);line-height:1.4}
+#pm{min-height:26px;margin-top:6px;font-size:18px;word-break:break-word}
 </style>
 </head>
 <body>
@@ -74,16 +86,17 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
    <div class="date" id="date"></div>
    <div class="now"><div class="tag" id="tag"></div><div class="big" id="big"></div><div class="sub" id="sub"></div><div class="bar"><i id="bar"></i></div></div>
    <div class="legend"><b>ყვითელი</b> — ახლა მიდის<br><i>ვარდისფერი</i> — შემდეგია<br>გადახაზული — გამოვიდა</div>
-   <div id="adm"><button id="up">📂 Excel-ის ატვირთვა</button> <span id="msg"></span><input type="file" id="fi" accept=".xlsx,.xls" hidden></div>
   </div>
   <div class="tbl ch" id="tbl"></div>
  </div></div>
  <div class="tray"></div>
  <div class="chalk" style="left:180px;transform:rotate(-4deg)"></div>
- <div class="chalk" style="left:260px;width:44px;background:#f6e27a;transform:rotate(3deg)"></div>
+ <div class="chalk" id="chalkY" title="ადმინ პანელი" style="left:260px;width:44px;background:#f6e27a;transform:rotate(3deg)"></div>
  <div class="chalk" style="left:330px;width:50px;background:#f4a9bb;transform:rotate(-2deg)"></div>
  <div class="erase"></div>
+ <div id="ov" hidden><div class="pnl"><button class="x" id="px">✕</button><div id="pb"></div></div></div>
 </div>
+<script src="config.js"></script>
 <script>
 const DAYS=["კვირა","ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი","შაბათი"];
 const MONTHS=["იანვარი","თებერვალი","მარტი","აპრილი","მაისი","ივნისი","ივლისი","აგვისტო","სექტემბერი","ოქტომბერი","ნოემბერი","დეკემბერი"];
@@ -128,29 +141,117 @@ function tick(){
  $("tag").textContent=tg;$("big").textContent=bg;$("sub").textContent=sb;$("bar").style.width=Math.max(0,Math.min(100,pr))+"%";
 }
 tick();setInterval(tick,1000);
-// ===== Excel =====
+// ===== Excel / Google Sheets =====
 const WD=["ორშაბათი","სამშაბათი","ოთხშაბათი","ხუთშაბათი","პარასკევი"];
 function tm(v){if(typeof v==="number"){const n=Math.round(v*1440);return p2(Math.floor(n/60))+":"+p2(n%60)}const r=/(\d{1,2}):(\d{2})/.exec(String(v||""));return r?p2(+r[1])+":"+r[2]:null}
-function parse(wb){
- const T=[];XLSX.utils.sheet_to_json(wb.Sheets["ზარები"],{header:1,raw:true}).slice(1).forEach(r=>{const a=tm(r[1]),b=tm(r[2]);if(a&&b)T.push([a,b])});
- if(!T.length)throw new Error("ზარები ვერ ვიპოვე");
+function build(get){
+ const bl=get("ზარები");if(!bl)throw new Error("ფურცელი არ არის: ზარები");
+ const T=[];bl.slice(1).forEach(r=>{const a=tm(r[1]),b=tm(r[2]);if(a&&b)T.push([a,b])});
+ if(!T.length)throw new Error("ზარების დროები ვერ ვიპოვე (ფურცელი „ზარები“)");
  const days={};let classes=[];
- WD.forEach((n,i)=>{const sh=wb.Sheets[n];if(!sh)throw new Error("ფურცელი არ არის: "+n);const o={},cl=[];
-  XLSX.utils.sheet_to_json(sh,{header:1,raw:true}).slice(1).forEach(r=>{const c=String(r[0]??"").trim();if(!c)return;cl.push(c);o[c]=T.map((_,j)=>String(r[j+1]??"").trim())});
+ WD.forEach((n,i)=>{const rows=get(n);if(!rows)throw new Error("ფურცელი არ არის: "+n);const o={},cl=[];
+  rows.slice(1).forEach(r=>{const c=String(r[0]??"").trim();if(!c)return;cl.push(c);o[c]=T.map((_,j)=>String(r[j+1]??"").trim())});
   days[i+1]=o;if(!classes.length)classes=cl});
  return{times:T,classes,days,at:Date.now()};
 }
-(async()=>{
- try{
-  const db=await claude.use("db");if(!db)return;const ref=db.doc("board/schedule");
-  ref.onSnapshot(s=>{if(s.exists){try{D=JSON.parse(s.data().json);key="";tick()}catch(e){}}});
-  if(q.has("edit")){$("adm").style.display="block";
-   $("up").onclick=()=>$("fi").click();
-   $("fi").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-    try{const nd=parse(XLSX.read(await f.arrayBuffer(),{type:"array"}));await ref.set({json:JSON.stringify(nd)});$("msg").textContent="✓ განახლდა"}
-    catch(err){$("msg").textContent="შეცდომა: "+(err.message||err.code)}};}
- }catch(e){}
-})();
+function csv(t){const rows=[];let r=[],f="",q2=false;for(let i=0;i<t.length;i++){const c=t[i];
+ if(q2){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q2=false}else f+=c}
+ else if(c=='"')q2=true;else if(c==","){r.push(f);f=""}else if(c=="\n"){r.push(f);rows.push(r);r=[];f=""}else if(c!="\r")f+=c}
+ if(f!==""||r.length){r.push(f);rows.push(r)}return rows}
+async function fetchSheet(id){
+ const out={};
+ await Promise.all(["ზარები",...WD].map(async n=>{
+  let r;try{r=await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(n)}`)}
+  catch(e){throw new Error("ვერ მივწვდი Google Sheets-ს (დაბლოკილია ბრაუზერის მიერ ან ინტერნეტი არ არის)")}
+  if(!r.ok)throw new Error("Google Sheets-მა დააბრუნა "+r.status+" ("+n+")");
+  const t=await r.text();
+  if(/^\s*</.test(t))throw new Error("ცხრილი დახურულია — Share → „Anyone with the link“ → Viewer");
+  const rows=csv(t),h=String(rows[0]&&rows[0][0]||"").trim(),need=n==="ზარები"?"გაკვეთილი":"კლასი";
+  if(h!==need)throw new Error("ფურცელი ვერ ვიპოვე ან A1 შეცვლილია: "+n);
+  out[n]=rows}));
+ return build(n=>out[n]);
+}
+const CFG=window.BOARD_CONFIG||{};
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let cfg=null,lastSig="",syncMsg="";
+function loadCfg(){const l=LS.get("board_cfg");const url=l&&l.url!==undefined?l.url:(CFG.SHEET_URL||"");const m2=/\/d\/([\w-]+)/.exec(url||"");return url&&m2?{url,sheetId:m2[1]}:null}
+function apply(nd){const sig=JSON.stringify([nd.times,nd.classes,nd.days]);if(sig!==lastSig){lastSig=sig;D=nd;key="";tick()}}
+async function sync(){
+ cfg=loadCfg();if(!cfg)return;
+ try{const nd=await fetchSheet(cfg.sheetId);apply(nd);LS.set("board_data",nd);syncMsg="✓ ბოლო სინქრონიზაცია: "+new Date().toLocaleTimeString("ka-GE",{hour12:false})}
+ catch(e){syncMsg="⚠ "+(e.message||e)}
+ const el=$("pm");if(el&&!ov.hidden&&unlocked&&el.dataset.sync==="1"){el.textContent=syncMsg}
+}
+// ===== ადმინ პანელი (ყვითელი ცარცი) =====
+const enc=new TextEncoder(),ov=$("ov"),pb=$("pb");
+const hx=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+const bx=h=>new Uint8Array(h.match(/../g).map(x=>parseInt(x,16)));
+async function pbk(pw,salt){const k=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveBits"]);return hx(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:bx(salt),iterations:150000},k,256))}
+const newSalt=()=>hx(crypto.getRandomValues(new Uint8Array(16)));
+function same(a,b){if(a.length!==b.length)return false;let d=0;for(let i=0;i<a.length;i++)d|=a.charCodeAt(i)^b.charCodeAt(i);return d===0}
+let unlocked=false,fails=0,lockUntil=0;
+const getAuth=()=>CFG.PASS_HASH&&CFG.PASS_SALT?{salt:CFG.PASS_SALT,hash:CFG.PASS_HASH}:null;
+function say(t,bad,sy){const e=$("pm");if(!e)return;e.textContent=t;e.style.color=bad?"#f4a9bb":"#a5d8f3";e.dataset.sync=sy?"1":""}
+function closePanel(){ov.hidden=true;unlocked=false;pb.innerHTML=""}
+$("chalkY").addEventListener("click",openPanel);
+$("px").onclick=closePanel;ov.addEventListener("mousedown",e=>{if(e.target===ov)closePanel()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!ov.hidden)closePanel()});
+function openPanel(){
+ ov.hidden=false;
+ if(!(window.crypto&&crypto.subtle)){pb.innerHTML="<p>ამ ბრაუზერში პაროლის შემოწმება მიუწვდომელია (საჭიროა https).</p>";return}
+ unlocked?viewAdmin():getAuth()?viewLogin():viewSetup();
+}
+function viewHash(salt,hash){
+ const txt=`  PASS_SALT:"${salt}",\n  PASS_HASH:"${hash}"`;
+ pb.innerHTML=`<h2>პაროლი მზადაა</h2><p>ჩასვი ეს ორი ხაზი <b>config.js</b>-ში (არსებული PASS_SALT და PASS_HASH ჩაანაცვლე) და ფაილი თავიდან ატვირთე Netlify-ზე:</p><textarea id="ht" readonly rows="3" style="width:100%;box-sizing:border-box;font:16px monospace;background:rgba(0,0,0,.3);color:#f4f2e8;border:2px solid rgba(244,242,232,.5);border-radius:8px;padding:10px"></textarea><button id="cpy">📋 კოპირება</button><div class="hint">სანამ config.js-ს არ განაახლებ, პანელი პაროლის გარეშე იხსნება.</div><div id="pm"></div><button id="ok">გაგრძელება</button>`;
+ $("ht").value=txt;$("cpy").onclick=async()=>{try{await navigator.clipboard.writeText(txt);say("✓ დაკოპირდა")}catch(e){$("ht").select();say("მონიშნულია — დააჭირე Ctrl+C")}};
+ $("ok").onclick=()=>{unlocked=true;viewAdmin()};
+}
+function viewSetup(){
+ pb.innerHTML=`<h2>პაროლის დაყენება</h2><p>პაროლი ჯერ არ არის დაყენებული. მოიფიქრე ადმინის პაროლი.</p><input id="p1" type="password" placeholder="პაროლი (მინ. 6 სიმბოლო)"><input id="p2" type="password" placeholder="გაიმეორე პაროლი"><button id="go">დაყენება</button><div id="pm"></div>`;
+ $("go").onclick=async()=>{const a=$("p1").value,b=$("p2").value;
+  if(a.length<6)return say("მინიმუმ 6 სიმბოლო",1);if(a!==b)return say("პაროლები არ ემთხვევა",1);
+  const salt=newSalt();viewHash(salt,await pbk(a,salt))};
+ setTimeout(()=>$("p1")&&$("p1").focus(),50);
+}
+function viewLogin(){
+ const auth=getAuth();
+ pb.innerHTML=`<h2>ადმინ პანელი</h2><input id="p1" type="password" placeholder="პაროლი"><button id="go">შესვლა</button><div id="pm"></div>`;
+ const go=async()=>{if(Date.now()<lockUntil)return say("ცოტა ხანი დაელოდე და სცადე თავიდან",1);
+  const h=await pbk($("p1").value,auth.salt);
+  if(same(h,auth.hash)){fails=0;unlocked=true;viewAdmin()}else{if(++fails>=5){lockUntil=Date.now()+30000;fails=0}say("არასწორი პაროლი",1)}};
+ $("go").onclick=go;$("p1").onkeydown=e=>{if(e.key==="Enter")go()};
+ setTimeout(()=>$("p1")&&$("p1").focus(),50);
+}
+function viewAdmin(){
+ pb.innerHTML=`<h2>ადმინ პანელი</h2>
+<label>Google Sheets-ის ბმული</label><input id="su" type="text" placeholder="https://docs.google.com/spreadsheets/d/…">
+<button id="sv">შენახვა და სინქრონიზაცია</button>
+<div class="hint">ცხრილი უნდა იყოს გახსნილი: Share → „Anyone with the link“ → Viewer. ფურცლები: ზარები, ორშაბათი … პარასკევი (A1 უჯრები არ შეცვალო). ბმული ინახება ამ ბრაუზერში; რომ ყველა მოწყობილობაზე იყოს, ჩაწერე config.js-ში (SHEET_URL).</div>
+<div id="pm"></div>
+<hr><button id="xl">📂 ან: Excel-ის ფაილის ატვირთვა (მხოლოდ ამ ბრაუზერში)</button><input type="file" id="xf" accept=".xlsx,.xls" hidden>
+<hr><input id="np" type="password" placeholder="ახალი პაროლი (მინ. 6 სიმბოლო)"><button id="cp">პაროლის შეცვლა</button>
+<hr><button id="lk">🔒 გასვლა</button>`;
+ $("su").value=(cfg&&cfg.url)||"";
+ if(cfg&&syncMsg)say(syncMsg,syncMsg[0]==="⚠",1);
+ $("sv").onclick=async()=>{const url=$("su").value.trim();
+  if(!url){LS.set("board_cfg",{url:""});cfg=null;say("Sheets გამორთულია");return}
+  const m2=/\/d\/([\w-]+)/.exec(url);if(!m2)return say("ბმული არასწორია — უნდა შეიცავდეს /d/…",1);
+  say("მოწმდება…");
+  try{const nd=await fetchSheet(m2[1]);LS.set("board_cfg",{url});LS.set("board_data",nd);cfg=loadCfg();apply(nd);syncMsg="✓ დაკავშირებულია";say("✓ დაკავშირებულია — "+nd.classes.length+" კლასი, "+nd.times.length+" გაკვეთილი",0,1)}
+  catch(e){say(e.message||String(e),1)}};
+ $("xl").onclick=()=>$("xf").click();
+ $("xf").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+   const nd=build(n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true}):null);
+   LS.set("board_data",nd);LS.set("board_cfg",{url:""});cfg=null;apply(nd);say("✓ ფაილი ატვირთულია (Sheets-ის ბმული გამოირთო)")}
+  catch(err){say("შეცდომა: "+(err.message||err.code),1)}};
+ $("cp").onclick=async()=>{const a=$("np").value;if(a.length<6)return say("მინიმუმ 6 სიმბოლო",1);const salt=newSalt();viewHash(salt,await pbk(a,salt))};
+ $("lk").onclick=closePanel;
+}
+// ===== გაშვება =====
+const cached=LS.get("board_data");if(cached&&cached.times)apply(cached);
+sync();setInterval(sync,Math.max(15,CFG.REFRESH_SECONDS||45)*1000);
 </script>
 </body>
 </html>
