@@ -9,6 +9,6 @@ window.BOARD_CONFIG={
 
   // ადმინ პანელის პაროლი (salted hash). ცარიელია -> პირველად გახსნისას
   // პანელი გაჩვენებს ორ ხაზს, ჩაანაცვლე ისინი აქ.
-  PASS_SALT:"",
-  PASS_HASH:""
+  PASS_SALT:"cf2a8ffa89fdc4b4f806bad3833e2fb1",
+  PASS_HASH:"3f761d062cc52c27a3a64ecd23521fb552e9033758ab22721687bb2d9dea6b3b"
 };
