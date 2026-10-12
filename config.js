@@ -2,7 +2,7 @@
 window.BOARD_CONFIG={
   // Google Sheets-ის ბმული (Share -> Anyone with the link -> Viewer).
   // შეგიძლია ცარიელიც დატოვო და ადმინ პანელიდან ჩასვა
-  SHEET_URL:"",
+  SHEET_URL:"https://docs.google.com/spreadsheets/d/1_mOHU8Cbf78m9qJhTb-zR3DL5Q1NtQNFaZzSJGWrFDg/edit?usp=sharing",
 
   // რამდენ წამში ერთხელ წაიკითხოს ცხრილი
   REFRESH_SECONDS:45,
