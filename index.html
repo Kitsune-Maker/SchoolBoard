@@ -87,11 +87,8 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
 .dust{position:absolute;left:150px;bottom:46px;width:260px;height:16px;pointer-events:none;opacity:.7;
  background:radial-gradient(circle at 8% 75%,#fff 0 1.5px,transparent 2.5px),radial-gradient(circle at 22% 40%,#fff 0 1px,transparent 2px),radial-gradient(circle at 37% 80%,#f6e27a 0 1.5px,transparent 2.5px),radial-gradient(circle at 55% 55%,#fff 0 1px,transparent 2px),radial-gradient(circle at 70% 85%,#f4a9bb 0 1.5px,transparent 2.5px),radial-gradient(circle at 88% 50%,#fff 0 1px,transparent 2px),radial-gradient(circle at 96% 78%,#fff 0 1.5px,transparent 2.5px)}
 .ul{display:block;width:270px;height:14px;margin:4px 0 2px;fill:none;stroke:var(--yellow);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
-.logo{position:absolute;left:30px;bottom:22px;width:330px;height:290px;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none;transform:rotate(-2deg)}
-.logo canvas,.logo img,.logo svg{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
-.logo svg{width:100%;height:100%;fill:none;stroke:var(--chalk);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
-.logo canvas,.logo img{display:none;opacity:.95}
-.logo img.plain{filter:grayscale(1) brightness(1.6) contrast(1.1);mix-blend-mode:screen}
+.logo{position:absolute;left:30px;bottom:22px;width:330px;height:290px;display:flex;align-items:center;justify-content:center;z-index:5;pointer-events:none}
+.logo img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .doodle{margin-top:auto;opacity:.55;font-family:"Caveat",sans-serif;color:var(--chalk);transform:rotate(-3deg);padding-bottom:8px;transform-origin:left bottom}
 .doodle .f1{font-size:50px;line-height:1}.doodle .f2{font-size:32px;color:var(--dim);line-height:1.1}
 .doodle svg{display:block;width:230px;height:70px;margin-top:6px;fill:none;stroke:var(--chalk);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
@@ -108,12 +105,11 @@ html,body{margin:0;height:100%;background:#2b2a28;overflow:hidden}
    <div class="clock" id="clock"></div>
    <div class="date" id="date"></div>
    <div class="now"><div class="tag" id="tag"></div><div class="big" id="big"></div><div class="sub" id="sub"></div><div class="bar"><i id="bar"></i></div></div>
-   <div class="legend"><b>ყვითელი</b> — ახლა მიდის<br><i>ვარდისფერი</i> — შემდეგია<br>გადახაზული — გამოვიდა</div>
+   <div class="legend"><b>ყვითელი</b> — ახლა მიდის<br><i>ვარდისფერი</i> — შემდეგი<br>გადახაზული — გამოვიდა</div>
   </div>
   <div class="tbl ch" id="tbl"></div>
-  <div class="logo ch" id="logo">
-   <svg id="emb" viewBox="0 0 300 240"><path d="M150 38 L242 74 L150 110 L58 74 Z"/><path d="M96 92 V122 Q150 150 204 122 V92"/><path d="M242 74 V116"/><path d="M242 116 l-6 14 h12 z"/><path d="M40 216 Q100 196 150 221 Q200 196 260 216 L260 171 Q200 151 150 176 Q100 151 40 171 Z"/><path d="M150 176 V221"/><path d="M70 188 Q100 180 128 192 M172 192 Q200 180 230 188"/><path d="M36 30 v22 M25 41 h22 M270 22 v18 M261 31 h18"/></svg>
-   <canvas id="logoC"></canvas><img id="logoImg" alt="">
+  <div class="logo" id="logo">
+   <img src="img/n1schoollogo-preview.png" alt="School logo">
   </div>
  </div></div>
  <div class="tray"></div>
@@ -157,7 +153,7 @@ function tick(){
   if(!school||L<0){t.style.gridTemplateColumns="1fr";t.style.gridTemplateRows="1fr";
    t.innerHTML=`<div class="msg">${!school?"დღეს გაკვეთილები არ არის":"გაკვეთილები დამთავრდა"}<small>${!school?"კარგად დაისვენეთ!":"კარგად მიხვიდეთ სახლში!"}</small></div>`;}
   else{const rows=Math.ceil(cls.length/3);t.style.gridTemplateColumns="repeat(3,1fr)";t.style.gridTemplateRows=`96px repeat(${rows},1fr)`;
-   let h2=`<div class="lh ${state}"><b>${L+1}-ე გაკვეთილი</b><span>${D.times[L][0]} – ${D.times[L][1]}</span><em>${state==="cur"?"":"შემდეგია"}</em></div>`;
+   let h2=`<div class="lh ${state}"><b>${L+1}-ე გაკვეთილი</b><span>${D.times[L][0]} – ${D.times[L][1]}</span><em>${state==="cur"?"":"შემდეგი"}</em></div>`;
    const tt=(D.teachers&&D.teachers[school?dow:1])||{},rr=(D.rooms&&D.rooms[school?dow:1])||{};
    const sc=Math.max(.62,Math.min(1,(((t.clientHeight||944)-96)/rows)/100));
    const esc=x=>String(x).replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
@@ -169,8 +165,8 @@ function tick(){
  let tg,bg,sb,pr=0;
  if(!school){tg="დღეს";bg="გაკვეთილები არ არის";sb="კარგად დაისვენეთ!"}
  else if(idx>=0){const[a,b]=T[idx];tg=`${idx+1}-ე გაკვეთილი · ${a}`;bg="მიმდინარეობს";sb=`გამოსვლამდე ${Math.ceil(m(b)-cur)} წუთი (${b})`;pr=(cur-m(a))/(m(b)-m(a))*100}
- else if(next===0){tg="გაკვეთილები ჯერ არ დაწყებულა";bg="1-ლი შემდეგია";sb=`იწყება ${T[0][0]}-ზე`}
- else if(next>0){const pb=m(T[next-1][1]);tg="შესვენება";bg=`${next+1}-ე შემდეგია`;sb=`დაწყებამდე ${Math.ceil(m(T[next][0])-cur)} წუთი`;pr=(cur-pb)/(m(T[next][0])-pb)*100}
+ else if(next===0){tg="გაკვეთილები ჯერ არ დაწყებულა";bg="1-ლი შემდეგი";sb=`იწყება ${T[0][0]}-ზე`}
+ else if(next>0){const pb=m(T[next-1][1]);tg="შესვენება";bg=`${next+1}-ე შემდეგი`;sb=`დაწყებამდე ${Math.ceil(m(T[next][0])-cur)} წუთი`;pr=(cur-pb)/(m(T[next][0])-pb)*100}
  else{tg="დღე დასრულდა";bg="გაკვეთილები დამთავრდა";sb="კარგად მიხვიდეთ სახლში!";pr=100}
  $("tag").textContent=tg;$("big").textContent=bg;{const w=Math.max(...bg.split(/\s+/).map(x=>x.length));$("big").style.fontSize=Math.max(30,Math.min(60,Math.floor(285/(w*.73))))+"px"}$("sub").style.fontSize=sb.length>16?"30px":"";$("sub").textContent=sb;$("bar").style.width=Math.max(0,Math.min(100,pr))+"%";
 }
@@ -287,33 +283,6 @@ function viewAdmin(){
  $("cp").onclick=async()=>{const a=$("np").value;if(a.length<6)return say("მინიმუმ 6 სიმბოლო",1);const salt=newSalt();viewHash(salt,await pbk(a,salt))};
  $("lk").onclick=closePanel;
 }
-// ===== ლოგო (ცარცით დახატული) =====
-function chalkify(im){
- const W=Math.min(im.naturalWidth,640),H=Math.max(1,Math.round(im.naturalHeight*W/im.naturalWidth));
- const c=$("logoC"),x=c.getContext("2d",{willReadFrequently:true});c.width=W;c.height=H;x.drawImage(im,0,0,W,H);
- let d;try{d=x.getImageData(0,0,W,H)}catch(e){return false}
- const p=d.data,co=[0,(W-1)*4,(H-1)*W*4,(H*W-1)*4];
- let bgA=0,bg=[0,0,0];co.forEach(o=>{bgA+=p[o+3];bg[0]+=p[o];bg[1]+=p[o+1];bg[2]+=p[o+2]});
- bgA/=4;bg=bg.map(v=>v/4);const opaque=bgA>200;
- for(let i=0;i<p.length;i+=4){
-  const r=p[i],g=p[i+1],b=p[i+2],a=p[i+3]/255;
-  let st=a;
-  if(opaque){st=Math.min(1,(Math.abs(r-bg[0])+Math.abs(g-bg[1])+Math.abs(b-bg[2]))/170)*a}
-  const sat=Math.max(r,g,b)-Math.min(r,g,b);
-  let R,G,B;
-  if(sat<45){R=244;G=242;B=232}else{R=r*.5+127;G=g*.5+127;B=b*.5+127}
-  if(Math.random()<.07)st*=.3;
-  st*=.74+Math.random()*.26;
-  p[i]=R;p[i+1]=G;p[i+2]=B;p[i+3]=Math.round(255*Math.min(1,st));
- }
- x.putImageData(d,0,0);return true;
-}
-(function(){const im=new Image();
- im.onload=()=>{
-  if(chalkify(im)){$("logoC").style.display="block";$("emb").style.display="none"}
-  else{const t=$("logoImg");t.className="plain";t.src=im.src;t.style.display="block";$("emb").style.display="none"}
- };
- im.src=(window.BOARD_CONFIG&&window.BOARD_CONFIG.LOGO)||"logo.png"})();
 // ===== გაშვება =====
 const cached=LS.get("board_data");if(cached&&cached.times)apply(cached);
 sync();setInterval(sync,Math.max(15,CFG.REFRESH_SECONDS||45)*1000);
